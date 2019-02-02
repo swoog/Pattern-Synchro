@@ -53,6 +53,7 @@ steps:
   displayName: 'NuGet push'
   inputs:
     command: push
+    packagesToPush: '**/*.nupkg'
     nuGetFeedType: external
     publishFeedCredentials: Nuget
 
