@@ -1,9 +1,11 @@
 using System;
 
-namespace Pattern.Synchro.Tests
+namespace Pattern.Synchro.Sample.Api
 {
     public class Device
     {
-        public DateTime LastUpdated { get; set; }
+        public Guid Id { get; set; }
+        
+        public DateTime LastSynchro { get; set; }
     }
 }

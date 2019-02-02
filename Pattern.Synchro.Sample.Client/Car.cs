@@ -1,7 +1,12 @@
-namespace Pattern.Synchro.Tests
+using System;
+using Pattern.Synchro.Client;
+
+namespace Pattern.Synchro.Sample.Client
 {
-    public class Car
+    public class Car : IEntity
     {
+        public Guid Id { get; set; }
+
         public string Name { get; set; }
     }
 }

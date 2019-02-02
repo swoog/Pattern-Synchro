@@ -1,11 +1,16 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
+using Pattern.Synchro.Api;
+using Pattern.Synchro.Client;
 using Pattern.Synchro.Sample.Api;
 using Pattern.Synchro.Sample.Client;
 using SQLite;
@@ -17,53 +22,94 @@ namespace Pattern.Synchro.Tests
     public class BaseTests : IClassFixture<WebApplicationFactory<Startup>>, IDisposable
     {
         private readonly HttpClient httpClient;
-        private readonly SampleDbContext entity;
-        private readonly string databaseName;
+        private readonly SampleDbContext serverDb;
+        private readonly string serverDatabaseName;
         private SQLiteAsyncConnection localDb;
         protected SynchroClient client;
+        private string localDatabaseName;
+        protected Guid deviceId;
+        protected IDateTimeService datimeService;
 
         public BaseTests(WebApplicationFactory<Startup> factory)
         {
-            this.databaseName = this.GetType().Name;
+            this.deviceId = Guid.NewGuid();
+            this.serverDatabaseName = this.GetType().Name;
+            this.localDatabaseName = this.GetType().Name + "local";
             this.httpClient = factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureTestServices(services =>
                 {
-                    EntityFrameworkServiceCollectionExtensions.AddDbContext<SampleDbContext>(services, opt =>
-                        SqliteDbContextOptionsBuilderExtensions.UseSqlite(opt, $"Data Source={this.databaseName}"));
+                    this.datimeService = Substitute.For<IDateTimeService>();
+                    services.AddTransient(c => this.datimeService);
+                    services.AddDbContext<SampleDbContext>(opt =>
+                        opt.UseSqlite($"Data Source={this.serverDatabaseName}"));
                 });
             }).CreateClient();
 
             var options = new DbContextOptionsBuilder<SampleDbContext>()
-                .UseSqlite($"Data Source={this.databaseName}")
+                .UseSqlite($"Data Source={this.serverDatabaseName}")
                 .Options;
 
-            this.entity = new SampleDbContext(options);
-            this.entity.Database.EnsureCreated();
+            this.serverDb = new SampleDbContext(options);
+            this.serverDb.Database.EnsureCreated();
 
-            this.localDb = new SQLiteAsyncConnection(":memory:");
+            this.localDb = new SQLiteAsyncConnection(this.localDatabaseName);
             Task.WaitAll(this.localDb.CreateTableAsync<Car>());
 
-            this.client = new SynchroClient(this.httpClient, this.localDb);
+            this.client = new SynchroClient(this.httpClient, this.localDb, new ClientPushSynchro(this.localDb));
+
+            this.client.DeviceId = deviceId;
         }
         
         protected async Task AddServer<T>(T obj) where T : class
         {
-            await this.entity.Set<T>().AddAsync(obj);
-            await this.entity.SaveChangesAsync();
+            await this.serverDb.Set<T>().AddAsync(obj);
+            await this.serverDb.SaveChangesAsync();
+            this.serverDb.Entry(obj).State = EntityState.Detached;
         }
-
-        protected async Task AssertLocal<T>(Predicate<T> predicate) where T : new()
+        
+        protected async Task AddLocal<T>(T obj)
         {
-            var car = await this.localDb.Table<T>().ToListAsync();
+            await this.localDb.InsertAsync(obj);
+        }
+        
+        protected async Task AssertLocal<T>(Func<T, bool> predicate) where T : new()
+        {
+            var entity = await this.localDb.Table<T>().ToListAsync();
 
-            Xunit.Assert.NotNull(car);
-            Xunit.Assert.Contains(car, predicate);
+            Xunit.Assert.NotNull(entity);
+            Xunit.Assert.True(entity.Count(predicate) == 1);
+        }
+        
+        protected async Task AssertServer<T>(Func<T, bool> predicate) where T : class, new()
+        {
+            var entity = await this.serverDb.Set<T>().ToListAsync();
+
+            Xunit.Assert.NotNull(entity);
+            Xunit.Assert.True(entity.Count(predicate) == 1);
         }
         
         public void Dispose()
         {
-            File.Delete(this.databaseName);
+            this.serverDb.Dispose();
+            Task.WaitAll(this.localDb.CloseAsync());
+            File.Delete(this.serverDatabaseName);
+            File.Delete(this.localDatabaseName);
+        }
+    }
+
+    public class ClientPushSynchro : IClientPushSynchro
+    {
+        private readonly SQLiteAsyncConnection db;
+
+        public ClientPushSynchro(SQLiteAsyncConnection db)
+        {
+            this.db = db;
+        }
+        
+        public async Task<List<IEntity>> GetEntities()
+        {
+            return (await this.db.Table<Car>().ToListAsync()).Cast<IEntity>().ToList();
         }
     }
 }

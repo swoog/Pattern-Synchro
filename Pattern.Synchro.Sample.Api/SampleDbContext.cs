@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace Pattern.Synchro.Tests
+namespace Pattern.Synchro.Sample.Api
 {
     public class SampleDbContext : DbContext
     {
@@ -13,6 +13,8 @@ namespace Pattern.Synchro.Tests
         {
         }
 
-        public DbSet<Model.Car> Cars { get; set; }
+        public DbSet<Device> Devices { get; set; }
+        
+        public DbSet<Car> Cars { get; set; }
     }
 }

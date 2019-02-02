@@ -1,13 +1,11 @@
+using System;
 using System.Collections.Generic;
+using Pattern.Synchro.Client;
 
-namespace Pattern.Synchro.Sample.Api
+namespace Pattern.Synchro.Api
 {
     public interface IPullSynchro
     {
-        List<IEntity> GetPull();
-    }
-
-    public interface IEntity
-    {
+        List<IEntity> GetPull(DateTime lastSynchro);
     }
 }

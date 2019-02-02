@@ -1,9 +1,9 @@
 using System.Threading.Tasks;
-using Pattern.Synchro.Client;
+using Pattern.Synchro.Api;
 
 namespace Pattern.Synchro.Sample.Api
 {
-    public class ServerPushProvider : IServerPushProvider
+    public class ServerPushProvider : ServerPushProviderBase<Client.Car>
     {
         private readonly SampleDbContext sampleDbContext;
 
@@ -12,21 +12,24 @@ namespace Pattern.Synchro.Sample.Api
             this.sampleDbContext = sampleDbContext;
         }
 
-        public Task<bool> CanPush(IEntity entity)
+        protected override async Task Push(Client.Car entity)
         {
-            return Task.FromResult(entity is Client.Car);
-        }
-        
-        public async Task Push(IEntity entity)
-        {
-            var carDto = (Client.Car) entity;
-            var car = new Car
+            var car = await this.sampleDbContext.Cars.FindAsync(entity.Id);
+
+            if (car == null)
             {
-                Id = carDto.Id,
-                Name = carDto.Name
-            };
+                car = new Car
+                {
+                    Id = entity.Id,
+                    Name = entity.Name
+                };
             
-            await this.sampleDbContext.Cars.AddAsync(car);
+                await this.sampleDbContext.Cars.AddAsync(car);                
+            }
+            else
+            {
+                car.Name = entity.Name;
+            }
 
             await this.sampleDbContext.SaveChangesAsync();
         }

@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Pattern.Synchro.Client;
 
-namespace Pattern.Synchro.Sample.Api
+namespace Pattern.Synchro.Api
 {
     public interface IServerPushProvider
     {
