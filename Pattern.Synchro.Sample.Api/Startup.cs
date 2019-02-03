@@ -14,11 +14,11 @@ namespace Pattern.Synchro.Sample.Api
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddTransient<IDeviceInformation, DeviceInformation>();
-            services.AddTransient<IServerPushProvider, ServerPushProvider>();
-            services.AddTransient<IServerPushSynchro, PushSynchro>();
+            services.AddSynchro();
             services.AddTransient<IPullSynchro, PullSynchro>();
-            services.AddTransient<SynchroMiddleWare>();
+            services.AddTransient<IServerPushProvider, ServerPushProvider>();
+
+            services.AddTransient<IDeviceInformation, DeviceInformation>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
