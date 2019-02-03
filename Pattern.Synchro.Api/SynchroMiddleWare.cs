@@ -92,20 +92,5 @@ namespace Pattern.Synchro.Api
 
             await next(context);
         }
-
-        
-    }
-
-    public interface IDateTimeService
-    {
-        DateTime DateTimeNow();
-    }
-
-    public class DateTimeService : IDateTimeService
-    {
-        public DateTime DateTimeNow()
-        {
-            return DateTime.Now;
-        }
     }
 }
