@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using Pattern.Synchro.Client;
 
-namespace Pattern.Synchro.Api
+namespace Pattern.Synchro.Api.Pull
 {
-    public interface IPullSynchro
+    public interface IServerPullProvider
     {
         List<IEntity> GetPull(DateTime lastSynchro);
     }

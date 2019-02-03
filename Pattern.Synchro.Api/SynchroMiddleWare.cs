@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
+using Pattern.Synchro.Api.Pull;
+using Pattern.Synchro.Api.Push;
 using Pattern.Synchro.Client;
 
 namespace Pattern.Synchro.Api

@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Pattern.Synchro.Api;
+using Pattern.Synchro.Api.Pull;
+using Pattern.Synchro.Api.Push;
 
 namespace Pattern.Synchro.Sample.Api
 {
@@ -15,8 +15,8 @@ namespace Pattern.Synchro.Sample.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSynchro();
-            services.AddTransient<IPullSynchro, PullSynchro>();
-            services.AddTransient<IServerPushProvider, ServerPushProvider>();
+            services.AddTransient<IServerPullProvider, CarPullProvider>();
+            services.AddTransient<IServerPushProvider, CarPushProvider>();
 
             services.AddTransient<IDeviceInformation, DeviceInformation>();
         }
