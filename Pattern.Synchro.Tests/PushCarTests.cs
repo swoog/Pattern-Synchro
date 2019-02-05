@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Pattern.Synchro.Api;
 using Pattern.Synchro.Sample.Api;
 using Xunit;
 
@@ -37,7 +38,7 @@ namespace Pattern.Synchro.Tests
             });
             
             var newGuid = Guid.NewGuid();
-            await this.AddServer(new Car()
+            await this.AddServer(new Car
             {
                 Id = newGuid,
                 Name = "Megane 4",

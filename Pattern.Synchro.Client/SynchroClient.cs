@@ -12,9 +12,9 @@ namespace Pattern.Synchro.Client
     {
         private readonly HttpClient httpClient;
         private readonly SQLiteAsyncConnection db;
-        private readonly IClientPushSynchro clientPushSynchro;
+        private readonly IEnumerable<IClientPushSynchro> clientPushSynchro;
 
-        public SynchroClient(HttpClient httpClient, SQLiteAsyncConnection db, IClientPushSynchro clientPushSynchro)
+        public SynchroClient(HttpClient httpClient, SQLiteAsyncConnection db, IEnumerable<IClientPushSynchro> clientPushSynchro)
         {
             this.httpClient = httpClient;
             this.db = db;
@@ -36,7 +36,7 @@ namespace Pattern.Synchro.Client
 
         private async Task End(SynchroDevice synchroDevice)
         {
-            var json = JsonConvert.SerializeObject(synchroDevice, new JsonSerializerSettings()
+            var json = JsonConvert.SerializeObject(synchroDevice, new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.All,
                 PreserveReferencesHandling = PreserveReferencesHandling.All
@@ -49,7 +49,7 @@ namespace Pattern.Synchro.Client
         {
             var response =  await this.httpClient.GetStringAsync($"/synchro/begin?deviceId={this.DeviceId}");
             
-            var synchroDevice = JsonConvert.DeserializeObject<SynchroDevice>(response, new JsonSerializerSettings()
+            var synchroDevice = JsonConvert.DeserializeObject<SynchroDevice>(response, new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.All,
                 PreserveReferencesHandling = PreserveReferencesHandling.All
@@ -60,9 +60,10 @@ namespace Pattern.Synchro.Client
 
         private async Task Push()
         {
-            var entities = await this.clientPushSynchro.GetEntities();
 
-            var json = JsonConvert.SerializeObject(entities, new JsonSerializerSettings()
+            var entities = await this.GetPushEntities();
+
+            var json = JsonConvert.SerializeObject(entities, new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.All,
                 PreserveReferencesHandling = PreserveReferencesHandling.All
@@ -71,11 +72,23 @@ namespace Pattern.Synchro.Client
             await this.httpClient.PostAsync($"/synchro?deviceId={this.DeviceId}", new StringContent(json, Encoding.UTF8, "application/json"));
         }
 
+        private async Task<List<IEntity>> GetPushEntities()
+        {
+            var entities = new List<IEntity>();
+            
+            foreach (var pushSynchro in this.clientPushSynchro)
+            {
+                entities.AddRange(await pushSynchro.GetEntities());
+            }
+
+            return entities;
+        }
+
         private async Task Pull()
         {
             var response = await this.httpClient.GetStringAsync($"/synchro?deviceId={this.DeviceId}");
 
-            var cars = JsonConvert.DeserializeObject<List<IEntity>>(response, new JsonSerializerSettings()
+            var cars = JsonConvert.DeserializeObject<List<IEntity>>(response, new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.All,
                 PreserveReferencesHandling = PreserveReferencesHandling.All

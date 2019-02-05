@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using Pattern.Synchro.Api;
 
 namespace Pattern.Synchro.Sample.Api
 {
-    public class SampleDbContext : DbContext
+    public class SampleDbContext : DbContext, IDeviceDbContext
     {
         public SampleDbContext()
         {

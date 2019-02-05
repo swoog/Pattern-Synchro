@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -56,7 +55,8 @@ namespace Pattern.Synchro.Tests
             this.localDb = new SQLiteAsyncConnection(this.localDatabaseName);
             Task.WaitAll(this.localDb.CreateTableAsync<Car>());
 
-            this.client = new SynchroClient(this.httpClient, this.localDb, new ClientPushSynchro(this.localDb));
+            this.client = new SynchroClient(this.httpClient, this.localDb,
+                new[] {new ClientPushSynchro<Car>(this.localDb)});
 
             this.client.DeviceId = deviceId;
         }
@@ -95,21 +95,6 @@ namespace Pattern.Synchro.Tests
             Task.WaitAll(this.localDb.CloseAsync());
             File.Delete(this.serverDatabaseName);
             File.Delete(this.localDatabaseName);
-        }
-    }
-
-    public class ClientPushSynchro : IClientPushSynchro
-    {
-        private readonly SQLiteAsyncConnection db;
-
-        public ClientPushSynchro(SQLiteAsyncConnection db)
-        {
-            this.db = db;
-        }
-        
-        public async Task<List<IEntity>> GetEntities()
-        {
-            return (await this.db.Table<Car>().ToListAsync()).Cast<IEntity>().ToList();
         }
     }
 }

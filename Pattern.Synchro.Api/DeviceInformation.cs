@@ -1,14 +1,15 @@
 using System;
 using System.Threading.Tasks;
-using Pattern.Synchro.Api;
+using Microsoft.EntityFrameworkCore;
 
-namespace Pattern.Synchro.Sample.Api
+namespace Pattern.Synchro.Api
 {
-    public class DeviceInformation : IDeviceInformation
+    public class DeviceInformation<TDbContext> : IDeviceInformation
+        where TDbContext : DbContext, IDeviceDbContext
     {
-        private readonly SampleDbContext db;
+        private readonly TDbContext db;
 
-        public DeviceInformation(SampleDbContext db)
+        public DeviceInformation(TDbContext db)
         {
             this.db = db;
         }
@@ -26,7 +27,7 @@ namespace Pattern.Synchro.Sample.Api
 
             if (device == null)
             {
-                device = new Device()
+                device = new Device
                 {
                     Id = deviceId,
                     LastSynchro = dateTime
@@ -41,5 +42,10 @@ namespace Pattern.Synchro.Sample.Api
 
             await this.db.SaveChangesAsync();
         }
+    }
+
+    public interface IDeviceDbContext
+    {
+        DbSet<Device> Devices { get; set; }
     }
 }

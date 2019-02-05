@@ -1,6 +1,6 @@
 using System;
 
-namespace Pattern.Synchro.Sample.Api
+namespace Pattern.Synchro.Api
 {
     public class Device
     {

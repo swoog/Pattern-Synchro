@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using NSubstitute;
+using Pattern.Synchro.Api;
 using Pattern.Synchro.Sample.Api;
 using Xunit;
 

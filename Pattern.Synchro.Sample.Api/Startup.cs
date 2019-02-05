@@ -18,7 +18,7 @@ namespace Pattern.Synchro.Sample.Api
             services.AddTransient<IServerPullProvider, CarPullProvider>();
             services.AddTransient<IServerPushProvider, CarPushProvider>();
 
-            services.AddTransient<IDeviceInformation, DeviceInformation>();
+            services.AddTransient<IDeviceInformation, DeviceInformation<SampleDbContext>>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

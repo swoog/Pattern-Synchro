@@ -38,7 +38,7 @@ namespace Pattern.Synchro.Api
                 var streamReader = new StreamReader(context.Request.Body);
 
                 var entities = JsonConvert.DeserializeObject<SynchroDevice>(streamReader.ReadToEnd(),
-                    new JsonSerializerSettings()
+                    new JsonSerializerSettings
                     {
                         TypeNameHandling = TypeNameHandling.All,
                         PreserveReferencesHandling = PreserveReferencesHandling.All
@@ -46,13 +46,14 @@ namespace Pattern.Synchro.Api
                 await this.deviceInformation.SaveLastSynchro(deviceId, entities.BeginServerDateTime);
                 return;
             }
-            else if (context.Request.Path.Value.StartsWith("/synchro/begin"))
+
+            if (context.Request.Path.Value.StartsWith("/synchro/begin"))
             {
-                var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new SynchroDevice()
+                var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new SynchroDevice
                     {
                         BeginServerDateTime = this.dateTimeService. DateTimeNow()
                     },
-                    new JsonSerializerSettings()
+                    new JsonSerializerSettings
                     {
                         TypeNameHandling = TypeNameHandling.All,
                         PreserveReferencesHandling = PreserveReferencesHandling.All
@@ -60,7 +61,8 @@ namespace Pattern.Synchro.Api
                 await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
                 return;
             }
-            else if (context.Request.Path.Value.StartsWith("/synchro"))
+
+            if (context.Request.Path.Value.StartsWith("/synchro"))
             {
                 switch (context.Request.Method)
                 {
@@ -71,7 +73,7 @@ namespace Pattern.Synchro.Api
                         var cars = this.pullSynchro.GetPull(lastSynchro);
 
                         var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(cars,
-                            new JsonSerializerSettings()
+                            new JsonSerializerSettings
                             {
                                 TypeNameHandling = TypeNameHandling.All,
                                 PreserveReferencesHandling = PreserveReferencesHandling.All
@@ -82,7 +84,7 @@ namespace Pattern.Synchro.Api
                         var streamReader = new StreamReader(context.Request.Body);
 
                         var entities = JsonConvert.DeserializeObject<List<IEntity>>(streamReader.ReadToEnd(),
-                            new JsonSerializerSettings()
+                            new JsonSerializerSettings
                             {
                                 TypeNameHandling = TypeNameHandling.All,
                                 PreserveReferencesHandling = PreserveReferencesHandling.All
