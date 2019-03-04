@@ -11,7 +11,6 @@ using NSubstitute;
 using Pattern.Synchro.Api;
 using Pattern.Synchro.Client;
 using Pattern.Synchro.Sample.Api;
-using Pattern.Synchro.Sample.Client;
 using SQLite;
 using Xunit;
 using Car = Pattern.Synchro.Sample.Client.Car;

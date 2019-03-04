@@ -14,7 +14,7 @@ namespace Pattern.Synchro.Tests
         }
         
         [Fact]
-        public async Task Should_Car_In_Local_Is_Add_When_Pull_From_Server()
+        public async Task Should_Car_In_Server_Is_Add_When_Push_From_Mobile()
         {
             var newGuid = Guid.NewGuid();
             await this.AddLocal(new Sample.Client.Car
@@ -26,6 +26,21 @@ namespace Pattern.Synchro.Tests
             await this.client.Run();
 
             await this.AssertServer<Car>(c => "Megane IV" == c.Name);
+        }
+        
+        [Fact]
+        public async Task Should_Car_Has_UserId_When_Push_From_Mobile()
+        {
+            var newGuid = Guid.NewGuid();
+            await this.AddLocal(new Sample.Client.Car
+            {
+                Id = newGuid,
+                Name = "Megane IV"
+            });
+            
+            await this.client.Run();
+
+            await this.AssertServer<Car>(c => "1" == c.UserId);
         }
         
         [Fact]

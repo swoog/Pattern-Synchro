@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Pattern.Synchro.Api;
 using Pattern.Synchro.Api.Pull;
 
 namespace Pattern.Synchro.Sample.Api

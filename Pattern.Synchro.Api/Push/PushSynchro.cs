@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Pattern.Synchro.Client;
 
 namespace Pattern.Synchro.Api.Push
@@ -13,7 +14,7 @@ namespace Pattern.Synchro.Api.Push
             this.pushProviders = pushProviders;
         }
         
-        public async Task Push(List<IEntity> entities)
+        public async Task Push(HttpContext context, List<IEntity> entities)
         {
             foreach (var entity in entities)
             {
@@ -21,7 +22,7 @@ namespace Pattern.Synchro.Api.Push
                 {
                     if (await pushProvider.CanPush(entity))
                     {
-                        await pushProvider.Push(entity);
+                        await pushProvider.Push(context, entity);
                     }   
                 }
             }

@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Pattern.Synchro.Client;
 
 namespace Pattern.Synchro.Api.Push
@@ -7,6 +8,6 @@ namespace Pattern.Synchro.Api.Push
     {
         Task<bool> CanPush(IEntity entity);
 
-        Task Push(IEntity entity);
+        Task Push(HttpContext context, IEntity entity);
     }
 }

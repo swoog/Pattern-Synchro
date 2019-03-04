@@ -1,7 +1,6 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Pattern.Synchro.Api;
 using Pattern.Synchro.Api.Push;
-using Remotion.Linq.Clauses;
 
 namespace Pattern.Synchro.Sample.Api
 {
@@ -16,8 +15,9 @@ namespace Pattern.Synchro.Sample.Api
             return db.Cars;
         }
 
-        protected override void UpdateProperties(Client.Car entity, Car car)
+        protected override void UpdateProperties(HttpContext context, Client.Car entity, Car car)
         {
+            car.UserId = context.User.Identity.Name;
             car.Name = entity.Name;
         }
     }

@@ -89,7 +89,7 @@ namespace Pattern.Synchro.Api
                                 TypeNameHandling = TypeNameHandling.All,
                                 PreserveReferencesHandling = PreserveReferencesHandling.All
                             });
-                        await this.serverPushSynchro.Push(entities);
+                        await this.serverPushSynchro.Push(context, entities);
                         return;
                 }
             }
