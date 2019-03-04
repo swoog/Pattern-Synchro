@@ -10,5 +10,7 @@ namespace Pattern.Synchro.Sample.Api
         public string Name { get; set; }
 
         public DateTime LastUpdated { get; set; }
+        
+        public string UserId { get; set; }
     }
 }

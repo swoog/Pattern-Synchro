@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Microsoft.AspNetCore.Http;
 using Pattern.Synchro.Client;
 
 namespace Pattern.Synchro.Api.Pull
@@ -13,12 +15,12 @@ namespace Pattern.Synchro.Api.Pull
             this.serverPullProviders = serverPullProviders;
         }
 
-        public List<IEntity> GetPull(DateTime lastSynchro)
+        public List<IEntity> GetPull(HttpContext context, DateTime lastSynchro)
         {
             var entities = new List<IEntity>();
             foreach (var serverPullProvider in this.serverPullProviders)
             {
-                entities.AddRange(serverPullProvider.GetPull(lastSynchro));
+                entities.AddRange(serverPullProvider.GetPull(context, lastSynchro));
             }
 
             return entities;

@@ -44,6 +44,8 @@ namespace Pattern.Synchro.Tests
                         opt.UseSqlite($"Data Source={this.serverDatabaseName}"));
                 });
             }).CreateClient();
+            
+            this.httpClient.DefaultRequestHeaders.Add("UserId", "1");
 
             var options = new DbContextOptionsBuilder<SampleDbContext>()
                 .UseSqlite($"Data Source={this.serverDatabaseName}")
@@ -79,6 +81,19 @@ namespace Pattern.Synchro.Tests
 
             Xunit.Assert.NotNull(entity);
             Xunit.Assert.True(entity.Count(predicate) == 1);
+        }
+        
+        protected Task AssertHaveOne<T>() where T : new()
+        {
+            return this.AssertHave<T>(1);
+        }
+
+        protected async Task AssertHave<T>(int count) where T : new()
+        {
+            var entity = await this.localDb.Table<T>().ToListAsync();
+
+            Xunit.Assert.NotNull(entity);
+            Xunit.Assert.True(entity.Count == count);
         }
         
         protected async Task AssertServer<T>(Func<T, bool> predicate) where T : class, new()

@@ -70,7 +70,7 @@ namespace Pattern.Synchro.Api
                         var deviceId = Guid.Parse(context.Request.Query["deviceId"]);
                         var lastSynchro = await this.deviceInformation.GetLastSynchro(deviceId) ?? DateTime.MinValue;
 
-                        var cars = this.pullSynchro.GetPull(lastSynchro);
+                        var cars = this.pullSynchro.GetPull(context, lastSynchro);
 
                         var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(cars,
                             new JsonSerializerSettings

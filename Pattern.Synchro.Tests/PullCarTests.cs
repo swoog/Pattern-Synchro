@@ -19,12 +19,36 @@ namespace Pattern.Synchro.Tests
             await this.AddServer(new Sample.Api.Car
             {
                 Id = Guid.NewGuid(),
-                Name = "Megane IV"
+                Name = "Megane IV",
+                UserId = "1"
             });
 
             await this.client.Run();
 
             await this.AssertLocal<Car>(c => "Megane IV" == c.Name);
+        }
+        
+        [Fact]
+        public async Task Should_Have_Car_In_Local_Database_When_Pull_From_Server_And_Filter_From_UserId()
+        {
+            await this.AddServer(new Sample.Api.Car
+            {
+                Id = Guid.NewGuid(),
+                Name = "Megane IV",
+                UserId = "1"
+            });
+            
+            await this.AddServer(new Sample.Api.Car
+            {
+                Id = Guid.NewGuid(),
+                Name = "Peugeot",
+                UserId = "2"
+            });
+
+            await this.client.Run();
+
+            await this.AssertLocal<Car>(c => "Megane IV" == c.Name);
+            await this.AssertHaveOne<Car>();
         }
         
         [Fact]
@@ -34,7 +58,8 @@ namespace Pattern.Synchro.Tests
             await this.AddServer(new Sample.Api.Car
             {
                 Id = newGuid,
-                Name = "Megane IV"
+                Name = "Megane IV",
+                UserId = "1"
             });
 
             await this.AddLocal(new Car

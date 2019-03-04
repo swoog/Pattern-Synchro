@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Pattern.Synchro.Client;
 
@@ -21,9 +22,9 @@ namespace Pattern.Synchro.Api.Pull
         protected abstract DbSet<TModel> GetDbSet(T db);
         
         protected abstract void UpdateProperties(TDto entity, TModel car);
-        public List<IEntity> GetPull(DateTime lastSynchro)
+        public List<IEntity> GetPull(HttpContext context, DateTime lastSynchro)
         {
-            return this.GetDbSet(this.db)
+            return AddFilter(this.GetDbSet(this.db), context, lastSynchro)
                 .Where(c => c.LastUpdated >= lastSynchro)
                 .ToList()
                 .Select(c =>
@@ -35,6 +36,11 @@ namespace Pattern.Synchro.Api.Pull
                     this.UpdateProperties(dto, c);
                     return dto;
                 }).Cast<IEntity>().ToList();
+        }
+
+        protected virtual IQueryable<TModel> AddFilter(DbSet<TModel> dbSet, HttpContext context, DateTime lastSynchro)
+        {
+            return dbSet;
         }
     }
 }
