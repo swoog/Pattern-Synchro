@@ -64,7 +64,7 @@ namespace Pattern.Synchro.Api
 
             if (context.Request.Path.Value.StartsWith("/synchro"))
             {
-                switch (context.Request.Method)
+                switch (context.Request.Method.ToUpperInvariant())
                 {
                     case "GET":
                         var deviceId = Guid.Parse(context.Request.Query["deviceId"]);
