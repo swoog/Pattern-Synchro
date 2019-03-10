@@ -38,7 +38,6 @@ namespace Pattern.Synchro.Client
         {
             var json = JsonConvert.SerializeObject(synchroDevice, new JsonSerializerSettings
             {
-                TypeNameHandling = TypeNameHandling.All,
                 PreserveReferencesHandling = PreserveReferencesHandling.All
             });
 
@@ -51,7 +50,6 @@ namespace Pattern.Synchro.Client
             
             var synchroDevice = JsonConvert.DeserializeObject<SynchroDevice>(response, new JsonSerializerSettings
             {
-                TypeNameHandling = TypeNameHandling.All,
                 PreserveReferencesHandling = PreserveReferencesHandling.All
             });
 
@@ -65,7 +63,6 @@ namespace Pattern.Synchro.Client
 
             var json = JsonConvert.SerializeObject(entities, new JsonSerializerSettings
             {
-                TypeNameHandling = TypeNameHandling.All,
                 PreserveReferencesHandling = PreserveReferencesHandling.All
             });
 
@@ -90,7 +87,6 @@ namespace Pattern.Synchro.Client
 
             var cars = JsonConvert.DeserializeObject<List<IEntity>>(response, new JsonSerializerSettings
             {
-                TypeNameHandling = TypeNameHandling.All,
                 PreserveReferencesHandling = PreserveReferencesHandling.All
             });
 

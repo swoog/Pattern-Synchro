@@ -40,7 +40,6 @@ namespace Pattern.Synchro.Api
                 var entities = JsonConvert.DeserializeObject<SynchroDevice>(streamReader.ReadToEnd(),
                     new JsonSerializerSettings
                     {
-                        TypeNameHandling = TypeNameHandling.All,
                         PreserveReferencesHandling = PreserveReferencesHandling.All
                     });
                 await this.deviceInformation.SaveLastSynchro(deviceId, entities.BeginServerDateTime);
@@ -55,7 +54,6 @@ namespace Pattern.Synchro.Api
                     },
                     new JsonSerializerSettings
                     {
-                        TypeNameHandling = TypeNameHandling.All,
                         PreserveReferencesHandling = PreserveReferencesHandling.All
                     }));
                 await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
@@ -75,7 +73,6 @@ namespace Pattern.Synchro.Api
                         var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(cars,
                             new JsonSerializerSettings
                             {
-                                TypeNameHandling = TypeNameHandling.All,
                                 PreserveReferencesHandling = PreserveReferencesHandling.All
                             }));
                         await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
@@ -86,7 +83,6 @@ namespace Pattern.Synchro.Api
                         var entities = JsonConvert.DeserializeObject<List<IEntity>>(streamReader.ReadToEnd(),
                             new JsonSerializerSettings
                             {
-                                TypeNameHandling = TypeNameHandling.All,
                                 PreserveReferencesHandling = PreserveReferencesHandling.All
                             });
                         await this.serverPushSynchro.Push(context, entities);
