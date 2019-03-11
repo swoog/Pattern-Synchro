@@ -13,6 +13,7 @@ namespace Pattern.Synchro.Client
         private readonly HttpClient httpClient;
         private readonly SQLiteAsyncConnection db;
         private readonly IEnumerable<IClientPushSynchro> clientPushSynchro;
+        private ISyncCallback syncCallback;
 
         public SynchroClient(HttpClient httpClient, SQLiteAsyncConnection db, IEnumerable<IClientPushSynchro> clientPushSynchro)
         {
@@ -25,13 +26,16 @@ namespace Pattern.Synchro.Client
 
         public async Task Run()
         {
+            this.syncCallback?.SyncEvents(SyncEvent.Begin, null);
             var synchroDevice = await this.Begin();
             
-            await this.Pull();
+          var pullEntities =  await this.Pull();
 
             await this.Push();
 
             await this.End(synchroDevice);
+            
+            this.syncCallback?.SyncEvents(SyncEvent.End, pullEntities);
         }
 
         private async Task End(SynchroDevice synchroDevice)
@@ -58,7 +62,6 @@ namespace Pattern.Synchro.Client
 
         private async Task Push()
         {
-
             var entities = await this.GetPushEntities();
 
             var json = JsonConvert.SerializeObject(entities, new JsonSerializerSettings
@@ -81,7 +84,7 @@ namespace Pattern.Synchro.Client
             return entities;
         }
 
-        private async Task Pull()
+        private async Task<List<IEntity>> Pull()
         {
             var response = await this.httpClient.GetStringAsync($"/synchro?deviceId={this.DeviceId}");
 
@@ -94,6 +97,13 @@ namespace Pattern.Synchro.Client
             {
                 await this.db.InsertOrReplaceAsync(car);
             }
+
+            return cars;
+        }
+
+        public async Task SetCallback(ISyncCallback syncCallback)
+        {
+            this.syncCallback = syncCallback;
         }
     }
 }
