@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Pattern.Synchro.Api;
@@ -20,7 +21,6 @@ namespace Pattern.Synchro.Tests
     public class BaseTests : IClassFixture<WebApplicationFactory<Startup>>, IDisposable
     {
         private readonly HttpClient httpClient;
-        private readonly SampleDbContext serverDb;
         private readonly string serverDatabaseName;
         private SQLiteAsyncConnection localDb;
         protected SynchroClient client;
@@ -46,12 +46,7 @@ namespace Pattern.Synchro.Tests
             
             this.httpClient.DefaultRequestHeaders.Add("UserId", "1");
 
-            var options = new DbContextOptionsBuilder<SampleDbContext>()
-                .UseSqlite($"Data Source={this.serverDatabaseName}")
-                .Options;
-
-            this.serverDb = new SampleDbContext(options);
-            this.serverDb.Database.EnsureCreated();
+            this.GetDbContext().Database.EnsureCreated();
 
             this.localDb = new SQLiteAsyncConnection(this.localDatabaseName);
             Task.WaitAll(this.localDb.CreateTableAsync<Car>());
@@ -61,12 +56,23 @@ namespace Pattern.Synchro.Tests
 
             this.client.DeviceId = deviceId;
         }
-        
+
+        private SampleDbContext GetDbContext()
+        {
+            var options = new DbContextOptionsBuilder<SampleDbContext>()
+                .UseSqlite($"Data Source={this.serverDatabaseName}")
+                .Options;
+
+            return new SampleDbContext(options);
+        }
+
         protected async Task AddServer<T>(T obj) where T : class
         {
-            await this.serverDb.Set<T>().AddAsync(obj);
-            await this.serverDb.SaveChangesAsync();
-            this.serverDb.Entry(obj).State = EntityState.Detached;
+            using (var db = this.GetDbContext())
+            {
+                await db.Set<T>().AddAsync(obj);
+                await db.SaveChangesAsync();
+            }
         }
         
         protected async Task AddLocal<T>(T obj)
@@ -97,15 +103,17 @@ namespace Pattern.Synchro.Tests
         
         protected async Task AssertServer<T>(Func<T, bool> predicate) where T : class, new()
         {
-            var entity = await this.serverDb.Set<T>().ToListAsync();
+            using (var db = this.GetDbContext())
+            {
+                var entity = await db.Set<T>().ToListAsync();
 
-            Xunit.Assert.NotNull(entity);
-            Xunit.Assert.True(entity.Count(predicate) == 1);
+                Xunit.Assert.NotNull(entity);
+                Xunit.Assert.True(entity.Count(predicate) == 1);
+            }
         }
         
         public void Dispose()
         {
-            this.serverDb.Dispose();
             Task.WaitAll(this.localDb.CloseAsync());
             File.Delete(this.serverDatabaseName);
             File.Delete(this.localDatabaseName);

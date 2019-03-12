@@ -28,13 +28,13 @@ namespace Pattern.Synchro.Client
         {
             this.syncCallback?.SyncEvents(SyncEvent.Begin, null);
             var synchroDevice = await this.Begin();
-            
-          var pullEntities =  await this.Pull();
+
+            var pullEntities = await this.Pull();
 
             await this.Push();
 
             await this.End(synchroDevice);
-            
+
             this.syncCallback?.SyncEvents(SyncEvent.End, pullEntities);
         }
 

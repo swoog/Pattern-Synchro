@@ -1,12 +1,14 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Pattern.Synchro.Api;
 using Pattern.Synchro.Api.Push;
 
 namespace Pattern.Synchro.Sample.Api
 {
     public class CarPushProvider : DbSetPushProvider<SampleDbContext, Car, Client.Car>
     {
-        public CarPushProvider(SampleDbContext sampleDbContext) : base(sampleDbContext)
+        public CarPushProvider(SampleDbContext sampleDbContext, IDateTimeService dateTimeService) 
+            : base(sampleDbContext, dateTimeService)
         {
         }
 
@@ -15,10 +17,16 @@ namespace Pattern.Synchro.Sample.Api
             return db.Cars;
         }
 
-        protected override void UpdateProperties(HttpContext context, Client.Car entity, Car car)
+        protected override bool UpdateProperties(HttpContext context, Client.Car entity, Car car)
         {
             car.UserId = context.User.Identity.Name;
-            car.Name = entity.Name;
+            if (car.Name != entity.Name)
+            {
+                car.Name = entity.Name;
+                return true;
+            }
+
+            return false;
         }
     }
 }

@@ -11,10 +11,12 @@ namespace Pattern.Synchro.Api.Push
         where TDto : IEntity
     {
         private readonly T db;
+        private readonly IDateTimeService dateTimeService;
 
-        protected DbSetPushProvider(T db)
+        protected DbSetPushProvider(T db, IDateTimeService dateTimeService)
         {
             this.db = db;
+            this.dateTimeService = dateTimeService;
         }
 
         protected abstract DbSet<TModel> GetDbSet(T db);
@@ -28,6 +30,7 @@ namespace Pattern.Synchro.Api.Push
                 car = new TModel
                 {
                     Id = entity.Id,
+                    LastUpdated = this.dateTimeService.DateTimeNow()
                 };
 
                 this.UpdateProperties(context, entity, car);
@@ -36,12 +39,15 @@ namespace Pattern.Synchro.Api.Push
             }
             else
             {
-                this.UpdateProperties(context, entity, car);
+                if (this.UpdateProperties(context, entity, car))
+                {
+                    car.LastUpdated = this.dateTimeService.DateTimeNow();                    
+                }
             }
 
             await this.db.SaveChangesAsync();
         }
 
-        protected abstract void UpdateProperties(HttpContext context, TDto entity, TModel car);
+        protected abstract bool UpdateProperties(HttpContext context, TDto entity, TModel car);
     }
 }
