@@ -33,15 +33,18 @@ namespace Pattern.Synchro.Api.Push
                     LastUpdated = this.dateTimeService.DateTimeNow()
                 };
 
+                car.IsDeleted = entity.IsDeleted;
                 this.UpdateProperties(context, entity, car);
                 
                 await this.GetDbSet(this.db).AddAsync(car);                
             }
             else
             {
-                if (this.UpdateProperties(context, entity, car))
+                if (this.UpdateProperties(context, entity, car)
+                    || car.IsDeleted != entity.IsDeleted)
                 {
-                    car.LastUpdated = this.dateTimeService.DateTimeNow();                    
+                    car.IsDeleted = entity.IsDeleted;
+                    car.LastUpdated = this.dateTimeService.DateTimeNow();
                 }
             }
 

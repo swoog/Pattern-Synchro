@@ -9,5 +9,7 @@ namespace Pattern.Synchro.Client
         Guid Id { get; set; }
 
         DateTime LastUpdated { get; set; }
+
+        bool IsDeleted { get; set; }
     }
 }

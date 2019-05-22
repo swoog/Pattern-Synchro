@@ -32,6 +32,7 @@ namespace Pattern.Synchro.Api.Pull
                     var dto = new TDto
                     {
                         Id = c.Id,
+                        IsDeleted = c.IsDeleted
                     };
                     this.UpdateProperties(dto, c);
                     return dto;

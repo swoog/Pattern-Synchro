@@ -77,7 +77,7 @@ namespace Pattern.Synchro.Tests
         
         protected async Task AddLocal<T>(T obj)
         {
-            await this.localDb.InsertAsync(obj);
+            await this.localDb.InsertOrReplaceAsync(obj);
         }
         
         protected async Task AssertLocal<T>(Func<T, bool> predicate) where T : new()

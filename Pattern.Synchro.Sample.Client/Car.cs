@@ -12,5 +12,7 @@ namespace Pattern.Synchro.Sample.Client
         public DateTime LastUpdated { get; set; }
 
         public string Name { get; set; }
+        
+        public bool IsDeleted { get; set; }
     }
 }

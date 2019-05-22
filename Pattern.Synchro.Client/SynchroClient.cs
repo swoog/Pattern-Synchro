@@ -95,7 +95,14 @@ namespace Pattern.Synchro.Client
 
             foreach (var car in cars)
             {
-                await this.db.InsertOrReplaceAsync(car);
+                if (car.IsDeleted)
+                {
+                    await this.db.DeleteAsync(car);
+                }
+                else
+                {
+                    await this.db.InsertOrReplaceAsync(car);
+                }
             }
 
             return cars;

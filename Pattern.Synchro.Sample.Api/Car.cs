@@ -12,5 +12,7 @@ namespace Pattern.Synchro.Sample.Api
         public DateTime LastUpdated { get; set; }
         
         public string UserId { get; set; }
+        
+        public bool IsDeleted { get; set; }
     }
 }
