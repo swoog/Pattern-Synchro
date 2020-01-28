@@ -22,7 +22,7 @@ namespace Pattern.Synchro.Tests
     {
         private readonly HttpClient httpClient;
         private readonly string serverDatabaseName;
-        private SQLiteAsyncConnection localDb;
+        protected SQLiteAsyncConnection localDb;
         protected SynchroClient client;
         private string localDatabaseName;
         protected Guid deviceId;

@@ -27,15 +27,23 @@ namespace Pattern.Synchro.Client
         public async Task Run()
         {
             this.syncCallback?.SyncEvents(SyncEvent.Begin, null);
-            var synchroDevice = await this.Begin();
 
-            var pullEntities = await this.Pull();
+            try
+            {
+                var synchroDevice = await this.Begin();
 
-            await this.Push();
+                var pullEntities = await this.Pull();
 
-            await this.End(synchroDevice);
+                await this.Push();
 
-            this.syncCallback?.SyncEvents(SyncEvent.End, pullEntities);
+                await this.End(synchroDevice);
+
+                this.syncCallback?.SyncEvents(SyncEvent.End, pullEntities);
+            }
+            catch (HttpRequestException requestException)
+            {
+                this.syncCallback?.SyncEvents(SyncEvent.End, new List<IEntity>());
+            }
         }
 
         private async Task End(SynchroDevice synchroDevice)
