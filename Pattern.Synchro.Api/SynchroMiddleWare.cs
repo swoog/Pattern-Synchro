@@ -37,12 +37,12 @@ namespace Pattern.Synchro.Api
                 var deviceId = Guid.Parse(context.Request.Query["deviceId"]);
                 var streamReader = new StreamReader(context.Request.Body);
 
-                var entities = JsonConvert.DeserializeObject<SynchroDevice>(streamReader.ReadToEnd(),
+                var entities = JsonConvert.DeserializeObject<SynchroDevice>(await streamReader.ReadToEndAsync().ConfigureAwait(false),
                     new JsonSerializerSettings
                     {
                         PreserveReferencesHandling = PreserveReferencesHandling.All
                     });
-                await this.deviceInformation.SaveLastSynchro(deviceId, entities.BeginServerDateTime);
+                await this.deviceInformation.SaveLastSynchro(deviceId, entities.BeginServerDateTime).ConfigureAwait(false);
                 return;
             }
 
@@ -56,7 +56,7 @@ namespace Pattern.Synchro.Api
                     {
                         PreserveReferencesHandling = PreserveReferencesHandling.All
                     }));
-                await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
+                await context.Response.Body.WriteAsync(bytes, 0, bytes.Length).ConfigureAwait(false);
                 return;
             }
 
@@ -66,7 +66,7 @@ namespace Pattern.Synchro.Api
                 {
                     case "GET":
                         var deviceId = Guid.Parse(context.Request.Query["deviceId"]);
-                        var lastSynchro = await this.deviceInformation.GetLastSynchro(deviceId) ?? DateTime.MinValue;
+                        var lastSynchro = await this.deviceInformation.GetLastSynchro(deviceId).ConfigureAwait(false) ?? DateTime.MinValue;
 
                         var cars = this.pullSynchro.GetPull(context, lastSynchro);
 
@@ -75,22 +75,22 @@ namespace Pattern.Synchro.Api
                             {
                                 PreserveReferencesHandling = PreserveReferencesHandling.All
                             }));
-                        await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
+                        await context.Response.Body.WriteAsync(bytes, 0, bytes.Length).ConfigureAwait(false);
                         return;
                     case "POST":
                         var streamReader = new StreamReader(context.Request.Body);
 
-                        var entities = JsonConvert.DeserializeObject<List<IEntity>>(streamReader.ReadToEnd(),
+                        var entities = JsonConvert.DeserializeObject<List<IEntity>>(await streamReader.ReadToEndAsync().ConfigureAwait(false),
                             new JsonSerializerSettings
                             {
                                 PreserveReferencesHandling = PreserveReferencesHandling.All
                             });
-                        await this.serverPushSynchro.Push(context, entities);
+                        await this.serverPushSynchro.Push(context, entities).ConfigureAwait(false);
                         return;
                 }
             }
 
-            await next(context);
+            await next(context).ConfigureAwait(false);
         }
     }
 }

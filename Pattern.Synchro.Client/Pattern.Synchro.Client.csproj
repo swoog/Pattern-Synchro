@@ -8,6 +8,6 @@
     
     <ItemGroup>
         <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
-        <PackageReference Include="sqlite-net-pcl" Version="1.6.258-beta" />
+        <PackageReference Include="sqlite-net-pcl" Version="1.7.302-beta" />
     </ItemGroup>
 </Project>

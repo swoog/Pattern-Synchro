@@ -76,7 +76,7 @@ namespace Pattern.Synchro.Tests
         }       
         
         [Fact]
-        public async Task Should_Car_In_Local_Is_Updated_When_Pull_From_Server2()
+        public async Task Should_Car_In_Server_Is_Updated_When_Push_To_Server()
         {
             this.datimeService.DateTimeNow().Returns(new DateTime(2019, 2, 2, 10, 01, 00));
             await this.AddServer(new Device

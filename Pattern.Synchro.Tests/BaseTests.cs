@@ -18,6 +18,7 @@ using Car = Pattern.Synchro.Sample.Client.Car;
 
 namespace Pattern.Synchro.Tests
 {
+    [Collection("Tests")]
     public class BaseTests : IClassFixture<WebApplicationFactory<Startup>>, IDisposable
     {
         private readonly HttpClient httpClient;
