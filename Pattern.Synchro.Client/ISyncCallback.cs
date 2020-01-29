@@ -4,6 +4,6 @@ namespace Pattern.Synchro.Client
 {
     public interface ISyncCallback
     {
-        void SyncEvents(SyncEvent begin, List<IEntity> entities);
+        void SyncEvents(SyncEvent @event, List<IEntity> entities);
     }
 }
