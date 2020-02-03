@@ -38,7 +38,7 @@ namespace Pattern.Synchro.Tests
 
             await this.client.Run();
 
-            syncCallback.Received(1).SyncEvents(SyncEvent.End, Arg.Any<List<IEntity>>());
+            await syncCallback.Received(1).SyncEvents(SyncEvent.End, Arg.Any<List<IEntity>>());
         }
 
         [Fact]
@@ -51,7 +51,7 @@ namespace Pattern.Synchro.Tests
 
             await this.client.Run();
 
-            syncCallback.Received(1).SyncEvents(SyncEvent.Begin, Arg.Any<List<IEntity>>());
+            await syncCallback.Received(1).SyncEvents(SyncEvent.Begin, Arg.Any<List<IEntity>>());
         }
         
         [Fact]
@@ -69,7 +69,7 @@ namespace Pattern.Synchro.Tests
 
             await this.client.Run();
 
-            syncCallback.Received(1).SyncEvents(SyncEvent.End, Arg.Is<List<IEntity>>(e => e.Any(c => c is Car)));
+            await syncCallback.Received(1).SyncEvents(SyncEvent.End, Arg.Is<List<IEntity>>(e => e.Any(c => c is Car)));
         }
         
                 
@@ -97,7 +97,7 @@ namespace Pattern.Synchro.Tests
 
             await this.client.Run();
 
-            syncCallback.Received(1).SyncEvents(SyncEvent.End, Arg.Is<List<IEntity>>(e => e.Count == 0));
+            await syncCallback.Received(1).SyncEvents(SyncEvent.End, Arg.Is<List<IEntity>>(e => e.Count == 0));
         }
     }
 }

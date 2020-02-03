@@ -26,7 +26,7 @@ namespace Pattern.Synchro.Client
 
         public async Task Run()
         {
-            this.syncCallback?.SyncEvents(SyncEvent.Begin, null);
+            await this.SyncEvents(SyncEvent.Begin, null);
 
             try
             {
@@ -38,12 +38,17 @@ namespace Pattern.Synchro.Client
 
                 await this.End(synchroDevice);
 
-                this.syncCallback?.SyncEvents(SyncEvent.End, pullEntities);
+                await this.SyncEvents(SyncEvent.End, pullEntities);
             }
             catch (HttpRequestException requestException)
             {
-                this.syncCallback?.SyncEvents(SyncEvent.End, new List<IEntity>());
+                await this.SyncEvents(SyncEvent.End, new List<IEntity>());
             }
+        }
+
+        private async Task SyncEvents(SyncEvent @event, List<IEntity> entities)
+        {
+            await (this.syncCallback?.SyncEvents(@event, entities) ?? Task.CompletedTask);
         }
 
         private async Task End(SynchroDevice synchroDevice)
