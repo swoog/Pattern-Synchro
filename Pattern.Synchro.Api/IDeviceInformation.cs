@@ -6,6 +6,7 @@ namespace Pattern.Synchro.Api
     public interface IDeviceInformation
     {
         Task<DateTime?> GetLastSynchro(Guid deviceId);
-        Task SaveLastSynchro(Guid deviceId, DateTime dateTime);
+        Task SaveLastSynchro(Guid deviceId, DateTime dateTime, DateTime entitiesLastLocalSyncDateTime);
+        Task<DateTime?> GetLastLocalSynchro(Guid deviceId);
     }
 }

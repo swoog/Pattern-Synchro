@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,10 +15,12 @@ namespace Pattern.Synchro.Client
         {
             this.db = db;
         }
-        
-        public async Task<List<IEntity>> GetEntities()
+
+        public async Task<List<IEntity>> GetEntities(DateTime lastUpdated)
         {
-            return (await this.db.Table<T>().ToListAsync()).Cast<IEntity>().ToList();
+            return (await this.db.Table<T>()
+                .Where(t => t.LastUpdated >= lastUpdated)
+                .ToListAsync()).Cast<IEntity>().ToList();
         }
     }
 }

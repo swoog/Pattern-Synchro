@@ -30,12 +30,14 @@ namespace Pattern.Synchro.Client
 
             try
             {
+                var beginLocalDateTime = DateTime.Now;
                 var synchroDevice = await this.Begin();
 
                 var pullEntities = await this.Pull();
 
-                await this.Push();
+                await this.Push(synchroDevice);
 
+                synchroDevice.LastLocalSyncDateTime = beginLocalDateTime;
                 await this.End(synchroDevice);
 
                 await this.SyncEvents(SyncEvent.End, pullEntities);
@@ -73,9 +75,10 @@ namespace Pattern.Synchro.Client
             return synchroDevice;
         }
 
-        private async Task Push()
+        private async Task Push(SynchroDevice synchroDevice)
         {
-            var entities = await this.GetPushEntities();
+            var lastUpdated = synchroDevice.LastLocalSyncDateTime;
+            var entities = await this.GetPushEntities(lastUpdated);
 
             var json = JsonConvert.SerializeObject(entities, new JsonSerializerSettings
             {
@@ -85,13 +88,13 @@ namespace Pattern.Synchro.Client
             await this.httpClient.PostAsync($"/synchro?deviceId={this.DeviceId}", new StringContent(json, Encoding.UTF8, "application/json"));
         }
 
-        private async Task<List<IEntity>> GetPushEntities()
+        private async Task<List<IEntity>> GetPushEntities(DateTime lastUpdated)
         {
             var entities = new List<IEntity>();
             
             foreach (var pushSynchro in this.clientPushSynchro)
             {
-                entities.AddRange(await pushSynchro.GetEntities());
+                entities.AddRange(await pushSynchro.GetEntities(lastUpdated));
             }
 
             return entities;

@@ -42,15 +42,17 @@ namespace Pattern.Synchro.Api
                     {
                         PreserveReferencesHandling = PreserveReferencesHandling.All
                     });
-                await this.deviceInformation.SaveLastSynchro(deviceId, entities.BeginServerDateTime).ConfigureAwait(false);
+                await this.deviceInformation.SaveLastSynchro(deviceId, entities.BeginServerDateTime, entities.LastLocalSyncDateTime).ConfigureAwait(false);
                 return;
             }
 
             if (context.Request.Path.Value.StartsWith("/synchro/begin"))
             {
+                var deviceId = Guid.Parse(context.Request.Query["deviceId"]);
                 var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new SynchroDevice
                     {
-                        BeginServerDateTime = this.dateTimeService. DateTimeNow()
+                        BeginServerDateTime = this.dateTimeService.DateTimeNow(),
+                        LastLocalSyncDateTime = (await this.deviceInformation.GetLastLocalSynchro(deviceId)) ?? DateTime.MinValue
                     },
                     new JsonSerializerSettings
                     {

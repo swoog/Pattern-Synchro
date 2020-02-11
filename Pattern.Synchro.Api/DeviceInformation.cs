@@ -20,8 +20,15 @@ namespace Pattern.Synchro.Api
 
             return device?.LastSynchro;
         }
+        
+        public async Task<DateTime?> GetLastLocalSynchro(Guid deviceId)
+        {
+            var device = await this.db.Devices.FindAsync(deviceId);
 
-        public async Task SaveLastSynchro(Guid deviceId, DateTime dateTime)
+            return device?.LastLocalSynchro;
+        }
+
+        public async Task SaveLastSynchro(Guid deviceId, DateTime dateTime, DateTime lastLocalSyncDateTime)
         {
             var device = await this.db.Devices.FindAsync(deviceId);
 
@@ -30,14 +37,16 @@ namespace Pattern.Synchro.Api
                 device = new Device
                 {
                     Id = deviceId,
-                    LastSynchro = dateTime
+                    LastSynchro = dateTime,
+                    LastLocalSynchro = lastLocalSyncDateTime
                 };
 
                 await this.db.Devices.AddAsync(device);
             }
             else
             {
-                device.LastSynchro = dateTime;                
+                device.LastSynchro = dateTime;
+                device.LastLocalSynchro = lastLocalSyncDateTime;
             }
 
             await this.db.SaveChangesAsync();
