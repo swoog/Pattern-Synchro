@@ -16,9 +16,9 @@ namespace Pattern.Synchro.Api.Push
         
         public async Task Push(HttpContext context, List<IEntity> entities)
         {
-            foreach (var entity in entities)
+            foreach (var pushProvider in this.pushProviders)
             {
-                foreach (var pushProvider in this.pushProviders)
+                foreach (var entity in entities)
                 {
                     if (await pushProvider.CanPush(entity))
                     {
