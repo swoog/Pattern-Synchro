@@ -16,17 +16,16 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
-- task: gittools.gitversion.gitversion-task.GitVersion@4
-  displayName: GitVersion
+- task: GitVersion@5
   inputs:
-    preferBundledVersion: false
+    runtime: 'core'
 
 - task: colinsalmcorner.colinsalmcorner-buildtasks.version-assemblies-task.VersionAssemblies@2
   displayName: 'Version Assemblies using **/*.csproj'
   inputs:
     filePattern: '**/*.csproj'
     versionSource: variable
-    customNumberVariable: GitVersion.NuGetVersionV2
+    customNumberVariable: GitVersion.NuGetVersion
     versionFormat: threeParts
     replaceVersionFormat: custom
     customReplaceRegex: '<VersionPrefix>\d+\.\d+\.\d+\.\d+</VersionPrefix>'
