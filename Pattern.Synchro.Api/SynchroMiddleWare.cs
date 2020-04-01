@@ -17,17 +17,20 @@ namespace Pattern.Synchro.Api
         private readonly IServerPushSynchro serverPushSynchro;
         private readonly IDeviceInformation deviceInformation;
         private readonly IDateTimeService dateTimeService;
+        private readonly IServerCallback serverCallback;
 
         public SynchroMiddleWare(
             IPullSynchro pullSynchro, 
             IServerPushSynchro serverPushSynchro, 
             IDeviceInformation deviceInformation,
-            IDateTimeService dateTimeService)
+            IDateTimeService dateTimeService,
+            IServerCallback serverCallback)
         {
             this.pullSynchro = pullSynchro;
             this.serverPushSynchro = serverPushSynchro;
             this.deviceInformation = deviceInformation;
             this.dateTimeService = dateTimeService;
+            this.serverCallback = serverCallback;
         }
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
@@ -48,6 +51,8 @@ namespace Pattern.Synchro.Api
 
             if (context.Request.Path.Value.StartsWith("/synchro/begin"))
             {
+                await this.serverCallback.Begin(context.Request.Headers).ConfigureAwait(false);
+                
                 var deviceId = Guid.Parse(context.Request.Query["deviceId"]);
                 var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new SynchroDevice
                     {

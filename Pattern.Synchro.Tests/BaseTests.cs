@@ -28,6 +28,7 @@ namespace Pattern.Synchro.Tests
         private string localDatabaseName;
         protected Guid deviceId;
         protected IDateTimeService datimeService;
+        protected IServerCallback serverCallback;
 
         public BaseTests(WebApplicationFactory<Startup> factory)
         {
@@ -40,6 +41,8 @@ namespace Pattern.Synchro.Tests
                 {
                     this.datimeService = Substitute.For<IDateTimeService>();
                     services.AddTransient(c => this.datimeService);
+                    this.serverCallback = Substitute.For<IServerCallback>();
+                    services.AddTransient(c => this.serverCallback);
                     services.AddDbContext<SampleDbContext>(opt =>
                         opt.UseSqlite($"Data Source={this.serverDatabaseName}"));
                 });

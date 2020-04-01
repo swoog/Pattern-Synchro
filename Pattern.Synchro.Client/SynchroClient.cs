@@ -24,14 +24,14 @@ namespace Pattern.Synchro.Client
 
         public Guid DeviceId { get; set; }
 
-        public async Task Run()
+        public async Task Run(Dictionary<string, string> headers = null)
         {
             await this.SyncEvents(SyncEvent.Begin, null);
 
             try
             {
                 var beginLocalDateTime = DateTime.Now;
-                var synchroDevice = await this.Begin();
+                var synchroDevice = await this.Begin(headers);
 
                 var pullEntities = await this.Pull();
 
@@ -63,16 +63,30 @@ namespace Pattern.Synchro.Client
             await this.httpClient.PostAsync($"/synchro/end?deviceId={this.DeviceId}", new StringContent(json, Encoding.UTF8, "application/json"));
         }
 
-        private async Task<SynchroDevice> Begin()
+        private async Task<SynchroDevice> Begin(Dictionary<string, string> headers)
         {
-            var response =  await this.httpClient.GetStringAsync($"/synchro/begin?deviceId={this.DeviceId}");
-            
-            var synchroDevice = JsonConvert.DeserializeObject<SynchroDevice>(response, new JsonSerializerSettings
+            using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get,
+                $"/synchro/begin?deviceId={this.DeviceId}"))
             {
-                PreserveReferencesHandling = PreserveReferencesHandling.All
-            });
+                if (headers != null)
+                {
+                    foreach (var key in headers.Keys)
+                    {
+                        httpRequestMessage.Headers.Add(key, headers[key]);
+                    }
+                }
+                
+                var httpResponseMessage = await this.httpClient.SendAsync(httpRequestMessage);
+                
+                var response = await httpResponseMessage.Content.ReadAsStringAsync();
 
-            return synchroDevice;
+                var synchroDevice = JsonConvert.DeserializeObject<SynchroDevice>(response, new JsonSerializerSettings
+                {
+                    PreserveReferencesHandling = PreserveReferencesHandling.All
+                });
+
+                return synchroDevice;               
+            }
         }
 
         private async Task Push(SynchroDevice synchroDevice)

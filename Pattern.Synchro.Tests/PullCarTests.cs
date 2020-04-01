@@ -106,6 +106,7 @@ namespace Pattern.Synchro.Tests
             {
                 Id = newGuid,
                 Name = "Megane 4",
+                LastUpdated = DateTime.Now
             });
 
             await this.client.Run();

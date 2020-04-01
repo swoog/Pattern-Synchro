@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using NSubstitute;
 using Pattern.Synchro.Api;
@@ -98,6 +99,58 @@ namespace Pattern.Synchro.Tests
             await this.client.Run();
 
             await syncCallback.Received(1).SyncEvents(SyncEvent.End, Arg.Is<List<IEntity>>(e => e.Count == 0));
+        }
+        
+        [Fact]
+        public async Task Should_Callback_Server_When_Synchro_Is_Begin()
+        {
+            var deviceId = Guid.NewGuid();
+            await this.AddServer(new Device
+            {
+                Id = deviceId,
+                LastSynchro =  new DateTime(2019, 2, 2, 10, 00, 45)
+            });
+            await this.AddServer(new Sample.Api.Car
+            {
+                Id = Guid.NewGuid(),
+                Name = "Megane IV",
+                UserId = "1",
+                LastUpdated = new DateTime(2019, 2, 2, 10, 00, 00)
+            });
+
+            this.client.DeviceId = deviceId;
+            
+            await this.client.Run();
+
+            await this.serverCallback.Received(1).Begin(Arg.Any<IHeaderDictionary>());
+        }
+        
+        [Fact]
+        public async Task Should_Callback_Server_Contains_Header_When_Synchro_With_Dictionary()
+        {
+            var deviceId = Guid.NewGuid();
+            await this.AddServer(new Device
+            {
+                Id = deviceId,
+                LastSynchro =  new DateTime(2019, 2, 2, 10, 00, 45)
+            });
+            await this.AddServer(new Sample.Api.Car
+            {
+                Id = Guid.NewGuid(),
+                Name = "Megane IV",
+                UserId = "1",
+                LastUpdated = new DateTime(2019, 2, 2, 10, 00, 00)
+            });
+
+            this.client.DeviceId = deviceId;
+            
+            await this.client.Run(new Dictionary<string, string>()
+            {
+                {"Key1", "Value1"}
+            });
+
+            await this.serverCallback.Received(1).Begin(Arg.Is<IHeaderDictionary>(
+                h => h.ContainsKey("Key1") && h["Key1"] == "Value1"));
         }
     }
 }
