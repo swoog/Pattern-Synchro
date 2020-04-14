@@ -8,7 +8,7 @@ namespace Pattern.Synchro.Api
         where TDbContext : DbContext, IDeviceDbContext
     {
         private readonly TDbContext db;
-
+        
         public DeviceInformation(TDbContext db)
         {
             this.db = db;
@@ -28,7 +28,14 @@ namespace Pattern.Synchro.Api
             return device?.LastLocalSynchro;
         }
 
-        public async Task SaveLastSynchro(Guid deviceId, DateTime dateTime, DateTime lastLocalSyncDateTime)
+        public async Task<int?> GetVersion(Guid deviceId)
+        {
+            var device = await this.db.Devices.FindAsync(deviceId);
+
+            return device?.Version;
+        }
+
+        public async Task SaveLastSynchro(Guid deviceId, DateTime dateTime, DateTime lastLocalSyncDateTime, int version)
         {
             var device = await this.db.Devices.FindAsync(deviceId);
 
@@ -38,7 +45,8 @@ namespace Pattern.Synchro.Api
                 {
                     Id = deviceId,
                     LastSynchro = dateTime,
-                    LastLocalSynchro = lastLocalSyncDateTime
+                    LastLocalSynchro = lastLocalSyncDateTime,
+                    Version = version
                 };
 
                 await this.db.Devices.AddAsync(device);
@@ -47,6 +55,7 @@ namespace Pattern.Synchro.Api
             {
                 device.LastSynchro = dateTime;
                 device.LastLocalSynchro = lastLocalSyncDateTime;
+                device.Version = version;
             }
 
             await this.db.SaveChangesAsync();

@@ -7,6 +7,6 @@ namespace Pattern.Synchro.Api.Push
 {
     public interface IServerPushSynchro
     {
-        Task Push(HttpContext context, List<IEntity> entities);
+        Task Push(HttpContext context, List<IEntity> entities, int version);
     }
 }

@@ -14,12 +14,12 @@ namespace Pattern.Synchro.Api.Pull
             this.serverPullProviders = serverPullProviders;
         }
 
-        public List<IEntity> GetPull(HttpContext context, DateTime lastSynchro)
+        public List<IEntity> GetPull(HttpContext context, DateTime lastSynchro, int previousVersion, int version)
         {
             var entities = new List<IEntity>();
             foreach (var serverPullProvider in this.serverPullProviders)
             {
-                entities.AddRange(serverPullProvider.GetPull(context, lastSynchro));
+                entities.AddRange(serverPullProvider.GetPull(context, lastSynchro, previousVersion, version));
             }
 
             return entities;

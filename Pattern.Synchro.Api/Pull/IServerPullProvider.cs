@@ -7,6 +7,6 @@ namespace Pattern.Synchro.Api.Pull
 {
     public interface IServerPullProvider
     {
-        List<IEntity> GetPull(HttpContext context, DateTime lastSynchro);
+        List<IEntity> GetPull(HttpContext context, DateTime lastSynchro, int previousVersion, int version);
     }
 }

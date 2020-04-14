@@ -18,6 +18,16 @@ namespace Pattern.Synchro.Tests
         public DeviceTests(WebApplicationFactory<Startup> factory) : base(factory)
         {
         }
+        
+        [Fact]
+        public async Task Should_Version_Is_Updated_On_Server_When_Synchro_End()
+        {
+            this.datimeService.DateTimeNow().Returns(new DateTime(2019, 2, 2, 10, 00, 45));
+
+            await this.client.Run(1);
+
+            await this.AssertServer<Device>(c => c.Version == 1);
+        }
 
         [Fact]
         public async Task Should_Device_Is_Updated_On_Server_When_Synchro_End()
@@ -143,8 +153,8 @@ namespace Pattern.Synchro.Tests
             });
 
             this.client.DeviceId = deviceId;
-            
-            await this.client.Run(new Dictionary<string, string>()
+
+            await this.client.Run(headers: new Dictionary<string, string>()
             {
                 {"Key1", "Value1"}
             });

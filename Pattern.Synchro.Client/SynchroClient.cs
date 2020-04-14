@@ -24,7 +24,7 @@ namespace Pattern.Synchro.Client
 
         public Guid DeviceId { get; set; }
 
-        public async Task Run(Dictionary<string, string> headers = null)
+        public async Task Run(int version = 0, Dictionary<string, string> headers = null)
         {
             await this.SyncEvents(SyncEvent.Begin, null);
 
@@ -33,11 +33,12 @@ namespace Pattern.Synchro.Client
                 var beginLocalDateTime = DateTime.Now;
                 var synchroDevice = await this.Begin(headers);
 
-                var pullEntities = await this.Pull();
+                var pullEntities = await this.Pull(version);
 
-                await this.Push(synchroDevice);
+                await this.Push(synchroDevice, version);
 
                 synchroDevice.LastLocalSyncDateTime = beginLocalDateTime;
+                synchroDevice.Version = version;
                 await this.End(synchroDevice);
 
                 await this.SyncEvents(SyncEvent.End, pullEntities);
@@ -89,7 +90,7 @@ namespace Pattern.Synchro.Client
             }
         }
 
-        private async Task Push(SynchroDevice synchroDevice)
+        private async Task Push(SynchroDevice synchroDevice, int version)
         {
             var lastUpdated = synchroDevice.LastLocalSyncDateTime;
             var entities = await this.GetPushEntities(lastUpdated);
@@ -99,7 +100,7 @@ namespace Pattern.Synchro.Client
                 PreserveReferencesHandling = PreserveReferencesHandling.All
             });
 
-            await this.httpClient.PostAsync($"/synchro?deviceId={this.DeviceId}", new StringContent(json, Encoding.UTF8, "application/json"));
+            await this.httpClient.PostAsync($"/synchro?deviceId={this.DeviceId}&version={version}", new StringContent(json, Encoding.UTF8, "application/json"));
         }
 
         private async Task<List<IEntity>> GetPushEntities(DateTime lastUpdated)
@@ -114,9 +115,9 @@ namespace Pattern.Synchro.Client
             return entities;
         }
 
-        private async Task<List<IEntity>> Pull()
+        private async Task<List<IEntity>> Pull(int version)
         {
-            var response = await this.httpClient.GetStringAsync($"/synchro?deviceId={this.DeviceId}");
+            var response = await this.httpClient.GetStringAsync($"/synchro?deviceId={this.DeviceId}&version={version}");
 
             var cars = JsonConvert.DeserializeObject<List<IEntity>>(response, new JsonSerializerSettings
             {

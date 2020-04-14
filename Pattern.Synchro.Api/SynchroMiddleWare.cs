@@ -45,7 +45,7 @@ namespace Pattern.Synchro.Api
                     {
                         PreserveReferencesHandling = PreserveReferencesHandling.All
                     });
-                await this.deviceInformation.SaveLastSynchro(deviceId, entities.BeginServerDateTime, entities.LastLocalSyncDateTime).ConfigureAwait(false);
+                await this.deviceInformation.SaveLastSynchro(deviceId, entities.BeginServerDateTime, entities.LastLocalSyncDateTime, entities.Version).ConfigureAwait(false);
                 return;
             }
 
@@ -57,7 +57,7 @@ namespace Pattern.Synchro.Api
                 var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new SynchroDevice
                     {
                         BeginServerDateTime = this.dateTimeService.DateTimeNow(),
-                        LastLocalSyncDateTime = (await this.deviceInformation.GetLastLocalSynchro(deviceId)) ?? DateTime.MinValue
+                        LastLocalSyncDateTime = (await this.deviceInformation.GetLastLocalSynchro(deviceId)) ?? DateTime.MinValue,
                     },
                     new JsonSerializerSettings
                     {
@@ -69,13 +69,15 @@ namespace Pattern.Synchro.Api
 
             if (context.Request.Path.Value.StartsWith("/synchro"))
             {
+                var version = context.Request.Query.ContainsKey("version") ? int.Parse(context.Request.Query["version"]) : 0;
                 switch (context.Request.Method.ToUpperInvariant())
                 {
                     case "GET":
                         var deviceId = Guid.Parse(context.Request.Query["deviceId"]);
+                        var previousVersion = (await this.deviceInformation.GetVersion(deviceId)) ?? version;
                         var lastSynchro = await this.deviceInformation.GetLastSynchro(deviceId).ConfigureAwait(false) ?? DateTime.MinValue;
 
-                        var cars = this.pullSynchro.GetPull(context, lastSynchro);
+                        var cars = this.pullSynchro.GetPull(context, lastSynchro, previousVersion, version);
 
                         var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(cars,
                             new JsonSerializerSettings
@@ -92,7 +94,7 @@ namespace Pattern.Synchro.Api
                             {
                                 PreserveReferencesHandling = PreserveReferencesHandling.All
                             });
-                        await this.serverPushSynchro.Push(context, entities).ConfigureAwait(false);
+                        await this.serverPushSynchro.Push(context, entities, version).ConfigureAwait(false);
                         return;
                 }
             }

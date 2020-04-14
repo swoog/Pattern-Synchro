@@ -25,6 +25,7 @@ namespace Pattern.Synchro.Sample.Api
             services.AddSynchro();
             services.AddTransient<IServerPullProvider, CarPullProvider>();
             services.AddTransient<IServerPushProvider, CarPushProvider>();
+            services.AddTransient<IServerPushProvider, CarV2PushProvider>();
 
             services.AddTransient<IDeviceInformation, DeviceInformation<SampleDbContext>>();
 

@@ -22,10 +22,11 @@ namespace Pattern.Synchro.Api.Pull
         protected abstract DbSet<TModel> GetDbSet(T db);
         
         protected abstract void UpdateProperties(TDto entity, TModel car);
-        public List<IEntity> GetPull(HttpContext context, DateTime lastSynchro)
+        public List<IEntity> GetPull(HttpContext context, DateTime lastSynchro, int previousVersion, int version)
         {
-            return AddFilter(this.GetDbSet(this.db), context, lastSynchro)
-                .Where(c => c.LastUpdated >= lastSynchro)
+            var dateTime = previousVersion != version ? DateTime.MinValue : lastSynchro;
+            return AddFilter(this.GetDbSet(this.db), context, dateTime)
+                .Where(c => c.LastUpdated >= dateTime)
                 .ToList()
                 .Select(c =>
                 {

@@ -6,7 +6,7 @@ namespace Pattern.Synchro.Api.Push
 {
     public abstract class ServerPushProviderBase<T> : IServerPushProvider
     {
-        public Task<bool> CanPush(IEntity entity)
+        public virtual Task<bool> CanPush(IEntity entity, int version)
         {
             return Task.FromResult(entity is T);
         }

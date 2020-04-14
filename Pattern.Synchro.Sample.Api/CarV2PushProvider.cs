@@ -7,24 +7,24 @@ using Pattern.Synchro.Client;
 
 namespace Pattern.Synchro.Sample.Api
 {
-    public class CarPushProvider : DbSetPushProvider<SampleDbContext, Car, Client.Car>
+    public class CarV2PushProvider : DbSetPushProvider<SampleDbContext, CarV2, Client.Car>
     {
-        public CarPushProvider(SampleDbContext sampleDbContext, IDateTimeService dateTimeService) 
+        public CarV2PushProvider(SampleDbContext sampleDbContext, IDateTimeService dateTimeService) 
             : base(sampleDbContext, dateTimeService)
         {
         }
 
         public override async Task<bool> CanPush(IEntity entity, int version)
         {
-            return await base.CanPush(entity, version) && version == 0;
+            return await base.CanPush(entity, version) && version == 2;
         }
 
-        protected override DbSet<Car> GetDbSet(SampleDbContext db)
+        protected override DbSet<CarV2> GetDbSet(SampleDbContext db)
         {
-            return db.Cars;
+            return db.CarV2s;
         }
 
-        protected override bool UpdateProperties(HttpContext context, Client.Car entity, Car car)
+        protected override bool UpdateProperties(HttpContext context, Client.Car entity, CarV2 car)
         {
             car.UserId = context.User.Identity.Name;
             if (car.Name != entity.Name)

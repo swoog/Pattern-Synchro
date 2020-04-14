@@ -17,5 +17,6 @@ namespace Pattern.Synchro.Sample.Api
         public DbSet<Device> Devices { get; set; }
         
         public DbSet<Car> Cars { get; set; }
+        public DbSet<CarV2> CarV2s { get; set; }
     }
 }
