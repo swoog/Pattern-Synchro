@@ -56,12 +56,20 @@ namespace Pattern.Synchro.Tests
         [Fact]
         public async Task Should_Car_In_Local_Is_Updated_When_Pull_From_Server()
         {
+            await this.AddServer(new Device
+            {
+                Id = this.deviceId,
+                LastSynchro = new DateTime(2020, 4, 17),
+                LastLocalSynchro = new DateTime(2020, 4, 17)
+            });
+            
             var newGuid = Guid.NewGuid();
             await this.AddServer(new Sample.Api.Car
             {
                 Id = newGuid,
                 Name = "Megane IV",
-                UserId = "1"
+                UserId = "1",
+                LastUpdated = new DateTime(2020, 4, 18)
             });
 
             await this.AddLocal(new Car

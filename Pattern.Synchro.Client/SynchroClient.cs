@@ -33,9 +33,9 @@ namespace Pattern.Synchro.Client
                 var beginLocalDateTime = DateTime.Now;
                 var synchroDevice = await this.Begin(headers);
 
-                var pullEntities = await this.Pull(version);
-
                 await this.Push(synchroDevice, version);
+
+                var pullEntities = await this.Pull(version);
 
                 synchroDevice.LastLocalSyncDateTime = beginLocalDateTime;
                 synchroDevice.Version = version;
