@@ -33,13 +33,13 @@ namespace Pattern.Synchro.Client
                 var beginLocalDateTime = DateTime.Now;
                 var synchroDevice = await this.Begin(headers);
 
-                await this.Push(synchroDevice, version);
+                await this.Push(headers, synchroDevice, version);
 
-                var pullEntities = await this.Pull(version);
+                var pullEntities = await this.Pull(headers, version);
 
                 synchroDevice.LastLocalSyncDateTime = beginLocalDateTime;
                 synchroDevice.Version = version;
-                await this.End(synchroDevice);
+                await this.End(headers, synchroDevice);
 
                 await this.SyncEvents(SyncEvent.End, pullEntities);
             }
@@ -54,14 +54,28 @@ namespace Pattern.Synchro.Client
             await (this.syncCallback?.SyncEvents(@event, entities) ?? Task.CompletedTask);
         }
 
-        private async Task End(SynchroDevice synchroDevice)
+        private async Task End(Dictionary<string, string> headers, SynchroDevice synchroDevice)
         {
-            var json = JsonConvert.SerializeObject(synchroDevice, new JsonSerializerSettings
+            using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post,
+                $"/synchro/end?deviceId={this.DeviceId}"))
             {
-                PreserveReferencesHandling = PreserveReferencesHandling.All
-            });
+                if (headers != null)
+                {
+                    foreach (var key in headers.Keys)
+                    {
+                        httpRequestMessage.Headers.Add(key, headers[key]);
+                    }
+                }
 
-            await this.httpClient.PostAsync($"/synchro/end?deviceId={this.DeviceId}", new StringContent(json, Encoding.UTF8, "application/json"));
+                var json = JsonConvert.SerializeObject(synchroDevice, new JsonSerializerSettings
+                {
+                    PreserveReferencesHandling = PreserveReferencesHandling.All
+                });
+
+                httpRequestMessage.Content = new StringContent(json, Encoding.UTF8, "application/json");
+                
+                await this.httpClient.SendAsync(httpRequestMessage);
+            }
         }
 
         private async Task<SynchroDevice> Begin(Dictionary<string, string> headers)
@@ -90,17 +104,30 @@ namespace Pattern.Synchro.Client
             }
         }
 
-        private async Task Push(SynchroDevice synchroDevice, int version)
+        private async Task Push(Dictionary<string, string> headers, SynchroDevice synchroDevice, int version)
         {
-            var lastUpdated = synchroDevice.LastLocalSyncDateTime;
-            var entities = await this.GetPushEntities(lastUpdated);
-
-            var json = JsonConvert.SerializeObject(entities, new JsonSerializerSettings
+            using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post,
+                $"/synchro?deviceId={this.DeviceId}&version={version}"))
             {
-                PreserveReferencesHandling = PreserveReferencesHandling.All
-            });
+                if (headers != null)
+                {
+                    foreach (var key in headers.Keys)
+                    {
+                        httpRequestMessage.Headers.Add(key, headers[key]);
+                    }
+                }
+                var lastUpdated = synchroDevice.LastLocalSyncDateTime;
+                var entities = await this.GetPushEntities(lastUpdated);
 
-            await this.httpClient.PostAsync($"/synchro?deviceId={this.DeviceId}&version={version}", new StringContent(json, Encoding.UTF8, "application/json"));
+                var json = JsonConvert.SerializeObject(entities, new JsonSerializerSettings
+                {
+                    PreserveReferencesHandling = PreserveReferencesHandling.All
+                });
+                
+                httpRequestMessage.Content = new StringContent(json, Encoding.UTF8, "application/json");
+                
+                await this.httpClient.SendAsync(httpRequestMessage);
+            }
         }
 
         private async Task<List<IEntity>> GetPushEntities(DateTime lastUpdated)
@@ -115,28 +142,42 @@ namespace Pattern.Synchro.Client
             return entities;
         }
 
-        private async Task<List<IEntity>> Pull(int version)
+        private async Task<List<IEntity>> Pull(Dictionary<string, string> headers, int version)
         {
-            var response = await this.httpClient.GetStringAsync($"/synchro?deviceId={this.DeviceId}&version={version}");
-
-            var cars = JsonConvert.DeserializeObject<List<IEntity>>(response, new JsonSerializerSettings
+            using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get,
+                $"/synchro?deviceId={this.DeviceId}&version={version}"))
             {
-                PreserveReferencesHandling = PreserveReferencesHandling.All
-            });
+                if (headers != null)
+                {
+                    foreach (var key in headers.Keys)
+                    {
+                        httpRequestMessage.Headers.Add(key, headers[key]);
+                    }
+                }
+                
+                var httpResponseMessage = await this.httpClient.SendAsync(httpRequestMessage);
+                
+                var response = await httpResponseMessage.Content.ReadAsStringAsync();
 
-            foreach (var car in cars)
-            {
-                if (car.IsDeleted)
+                var cars = JsonConvert.DeserializeObject<List<IEntity>>(response, new JsonSerializerSettings
                 {
-                    await this.db.DeleteAsync(car);
-                }
-                else
+                    PreserveReferencesHandling = PreserveReferencesHandling.All
+                });
+
+                foreach (var car in cars)
                 {
-                    await this.db.InsertOrReplaceAsync(car);
+                    if (car.IsDeleted)
+                    {
+                        await this.db.DeleteAsync(car);
+                    }
+                    else
+                    {
+                        await this.db.InsertOrReplaceAsync(car);
+                    }
                 }
+
+                return cars;
             }
-
-            return cars;
         }
 
         public async Task SetCallback(ISyncCallback syncCallback)

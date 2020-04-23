@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Pattern.Synchro.Api
@@ -14,16 +15,20 @@ namespace Pattern.Synchro.Api
             this.db = db;
         }
 
-        public async Task<DateTime?> GetLastSynchro(Guid deviceId)
+        public async Task<DateTime?> GetLastSynchro(HttpContext context, Guid deviceId)
         {
             var device = await this.db.Devices.FindAsync(deviceId);
+
+            this.Verify(context, device);
 
             return device?.LastSynchro;
         }
         
-        public async Task<DateTime?> GetLastLocalSynchro(Guid deviceId)
+        public async Task<DateTime?> GetLastLocalSynchro(HttpContext context, Guid deviceId)
         {
             var device = await this.db.Devices.FindAsync(deviceId);
+
+            this.Verify(context, device);
 
             var deviceLastLocalSynchro = device?.LastLocalSynchro;
 
@@ -35,16 +40,21 @@ namespace Pattern.Synchro.Api
             return null;
         }
 
-        public async Task<int?> GetVersion(Guid deviceId)
+        public async Task<int?> GetVersion(HttpContext context, Guid deviceId)
         {
             var device = await this.db.Devices.FindAsync(deviceId);
+
+            this.Verify(context, device);
 
             return device?.Version;
         }
 
-        public async Task SaveLastSynchro(Guid deviceId, DateTime dateTime, DateTime lastLocalSyncDateTime, int version)
+        public async Task SaveLastSynchro(HttpContext context, Guid deviceId, DateTime dateTime,
+            DateTime lastLocalSyncDateTime, int version)
         {
             var device = await this.db.Devices.FindAsync(deviceId);
+
+            this.Verify(context, device);
 
             if (device == null)
             {
@@ -55,7 +65,7 @@ namespace Pattern.Synchro.Api
                     LastLocalSynchro = lastLocalSyncDateTime,
                     Version = version
                 };
-
+                
                 await this.db.Devices.AddAsync(device);
             }
             else
@@ -65,7 +75,19 @@ namespace Pattern.Synchro.Api
                 device.Version = version;
             }
 
+            this.SaveLastSynchro(context, device);
+
             await this.db.SaveChangesAsync();
+        }
+
+        protected virtual void SaveLastSynchro(HttpContext context, Device device)
+        {
+            
+        }
+        
+        protected virtual void Verify(HttpContext context, Device device)
+        {
+            
         }
     }
 

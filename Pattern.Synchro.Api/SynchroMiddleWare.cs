@@ -45,7 +45,7 @@ namespace Pattern.Synchro.Api
                     {
                         PreserveReferencesHandling = PreserveReferencesHandling.All
                     });
-                await this.deviceInformation.SaveLastSynchro(deviceId, entities.BeginServerDateTime, entities.LastLocalSyncDateTime, entities.Version).ConfigureAwait(false);
+                await this.deviceInformation.SaveLastSynchro(context, deviceId, entities.BeginServerDateTime, entities.LastLocalSyncDateTime, entities.Version).ConfigureAwait(false);
                 return;
             }
 
@@ -57,7 +57,7 @@ namespace Pattern.Synchro.Api
                 var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new SynchroDevice
                     {
                         BeginServerDateTime = this.dateTimeService.DateTimeNow(),
-                        LastLocalSyncDateTime = (await this.deviceInformation.GetLastLocalSynchro(deviceId)) ?? DateTime.MinValue,
+                        LastLocalSyncDateTime = (await this.deviceInformation.GetLastLocalSynchro(context, deviceId)) ?? DateTime.MinValue,
                     },
                     new JsonSerializerSettings
                     {
@@ -74,8 +74,8 @@ namespace Pattern.Synchro.Api
                 {
                     case "GET":
                         var deviceId = Guid.Parse(context.Request.Query["deviceId"]);
-                        var previousVersion = (await this.deviceInformation.GetVersion(deviceId)) ?? version;
-                        var lastSynchro = await this.deviceInformation.GetLastSynchro(deviceId).ConfigureAwait(false) ?? DateTime.MinValue;
+                        var previousVersion = (await this.deviceInformation.GetVersion(context, deviceId)) ?? version;
+                        var lastSynchro = await this.deviceInformation.GetLastSynchro(context, deviceId).ConfigureAwait(false) ?? DateTime.MinValue;
 
                         var cars = this.pullSynchro.GetPull(context, lastSynchro, previousVersion, version);
 
