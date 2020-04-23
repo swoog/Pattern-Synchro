@@ -25,7 +25,14 @@ namespace Pattern.Synchro.Api
         {
             var device = await this.db.Devices.FindAsync(deviceId);
 
-            return device?.LastLocalSynchro;
+            var deviceLastLocalSynchro = device?.LastLocalSynchro;
+
+            if (deviceLastLocalSynchro.HasValue)
+            {
+                return new DateTime(deviceLastLocalSynchro.Value.Ticks, DateTimeKind.Utc);
+            }
+
+            return null;
         }
 
         public async Task<int?> GetVersion(Guid deviceId)

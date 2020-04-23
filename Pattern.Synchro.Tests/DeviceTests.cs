@@ -38,7 +38,7 @@ namespace Pattern.Synchro.Tests
 
             await this.AssertServer<Device>(c => c.LastSynchro == new DateTime(2019, 2, 2, 10, 00, 45));
         }
-
+        
         [Fact]
         public async Task Should_Callback_When_Synchro_Is_End()
         {
