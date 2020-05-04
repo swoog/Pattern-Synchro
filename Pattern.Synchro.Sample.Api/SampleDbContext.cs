@@ -3,7 +3,7 @@ using Pattern.Synchro.Api;
 
 namespace Pattern.Synchro.Sample.Api
 {
-    public class SampleDbContext : DbContext, IDeviceDbContext
+    public class SampleDbContext : DbContext, IDeviceDbContext<Device>
     {
         public SampleDbContext()
         {

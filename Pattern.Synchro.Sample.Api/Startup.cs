@@ -27,7 +27,7 @@ namespace Pattern.Synchro.Sample.Api
             services.AddTransient<IServerPushProvider, CarPushProvider>();
             services.AddTransient<IServerPushProvider, CarV2PushProvider>();
 
-            services.AddTransient<IDeviceInformation, DeviceInformation<SampleDbContext>>();
+            services.AddTransient<IDeviceInformation, DeviceInformation>();
 
             services.AddAuthentication("UserId")
                 .AddScheme<UserAuthentificationOptions, UserAuthentification>("UserId", opt => { });

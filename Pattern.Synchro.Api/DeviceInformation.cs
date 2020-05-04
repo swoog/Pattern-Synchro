@@ -5,8 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Pattern.Synchro.Api
 {
-    public class DeviceInformation<TDbContext> : IDeviceInformation
-        where TDbContext : DbContext, IDeviceDbContext
+    public abstract class DeviceInformation<TDbContext, TDevice> : IDeviceInformation
+        where TDbContext : DbContext, IDeviceDbContext<TDevice> 
+        where TDevice : Device
     {
         private readonly TDbContext db;
         
@@ -58,13 +59,11 @@ namespace Pattern.Synchro.Api
 
             if (device == null)
             {
-                device = new Device
-                {
-                    Id = deviceId,
-                    LastSynchro = dateTime,
-                    LastLocalSynchro = lastLocalSyncDateTime,
-                    Version = version
-                };
+                device = this.Create();
+                device.Id = deviceId;
+                device.LastSynchro = dateTime;
+                device.LastLocalSynchro = lastLocalSyncDateTime;
+                device.Version = version;
                 
                 await this.db.Devices.AddAsync(device);
             }
@@ -89,10 +88,13 @@ namespace Pattern.Synchro.Api
         {
             
         }
+
+        protected abstract TDevice Create();
     }
 
-    public interface IDeviceDbContext
+    public interface IDeviceDbContext<T>
+        where T : Device
     {
-        DbSet<Device> Devices { get; set; }
+        DbSet<T> Devices { get; set; }
     }
 }
